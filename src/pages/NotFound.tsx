@@ -1,5 +1,8 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+
+import React, { useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { GalleryHorizontal } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,13 +15,22 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-white to-gallery-lightGray">
+      <div className="max-w-md w-full px-8 py-12 neumorph text-center">
+        <GalleryHorizontal className="h-16 w-16 text-gallery-purple mx-auto mb-6" />
+        
+        <h1 className="text-4xl font-bold text-gallery-darkGray mb-2">404</h1>
+        <p className="text-xl text-gallery-darkGray mb-6">Artwork Not Found</p>
+        
+        <p className="text-gallery-gray mb-8">
+          The masterpiece you're looking for seems to have been moved or doesn't exist.
+        </p>
+        
+        <Link to="/">
+          <Button className="bg-gallery-purple hover:bg-opacity-90 w-full">
+            Return to Gallery
+          </Button>
+        </Link>
       </div>
     </div>
   );
