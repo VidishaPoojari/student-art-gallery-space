@@ -94,13 +94,13 @@ const artworks = [
 
 const Gallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('all');
   
   // Filter artworks based on search term and category
   const filteredArtworks = artworks.filter(artwork => {
     const matchesSearch = artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          artwork.artist.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === '' || artwork.category === category;
+    const matchesCategory = category === 'all' || artwork.category === category;
     
     return matchesSearch && matchesCategory;
   });
@@ -140,7 +140,7 @@ const Gallery = () => {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="Painting">Painting</SelectItem>
                     <SelectItem value="Digital Art">Digital Art</SelectItem>
                     <SelectItem value="Photography">Photography</SelectItem>
