@@ -71,7 +71,7 @@ const relatedArtworks = [
 const ArtworkDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [comment, setComment] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Temporarily set to true for testing
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Set default to false
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes);
   const [comments, setComments] = useState(artwork.comments);
@@ -80,6 +80,16 @@ const ArtworkDetail = () => {
   // For now, we'll use our mock data
   
   const handleLike = () => {
+    if (!isLoggedIn) {
+      // If not logged in, redirect to login page
+      toast({
+        title: "Login Required",
+        description: "Please log in to like artworks.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (isLiked) {
       setLikeCount(prev => prev - 1);
       setIsLiked(false);
@@ -102,6 +112,15 @@ const ArtworkDetail = () => {
   
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to comment on artworks.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!comment.trim()) {
       toast({
@@ -140,12 +159,32 @@ const ArtworkDetail = () => {
     console.log('Comment submitted:', comment);
   };
   
+  // For demonstration purposes - toggle login status with a button
+  const toggleLogin = () => {
+    setIsLoggedIn(!isLoggedIn);
+    toast({
+      title: isLoggedIn ? "Logged Out" : "Logged In",
+      description: isLoggedIn ? "You have been logged out." : "You are now logged in as a test user.",
+    });
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-1 py-10 px-4">
         <div className="container mx-auto max-w-6xl">
+          {/* Demo Login Toggle (would be removed in a real app) */}
+          <div className="mb-4 flex justify-end">
+            <Button 
+              onClick={toggleLogin} 
+              variant="outline" 
+              className="text-sm"
+            >
+              {isLoggedIn ? "Demo: Log Out" : "Demo: Log In"}
+            </Button>
+          </div>
+          
           {/* Artwork Showcase */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             <div className="neumorph overflow-hidden">
