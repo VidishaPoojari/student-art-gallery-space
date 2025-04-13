@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Heart, MessageSquare, Share, Clock, User } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/use-toast';
 import Navbar from '@/components/Navbar';
 import ArtworkCard from '@/components/ArtworkCard';
 
@@ -69,17 +70,74 @@ const relatedArtworks = [
 
 const ArtworkDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [comment, setComment] = React.useState('');
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false); // Replace with actual auth state
+  const [comment, setComment] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Temporarily set to true for testing
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(artwork.likes);
+  const [comments, setComments] = useState(artwork.comments);
   
   // In a real app, we would fetch the artwork data based on the ID
   // For now, we'll use our mock data
   
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(prev => prev - 1);
+      setIsLiked(false);
+      toast({
+        title: "Unliked",
+        description: `You've removed your like from "${artwork.title}"`,
+      });
+    } else {
+      setLikeCount(prev => prev + 1);
+      setIsLiked(true);
+      toast({
+        title: "Liked!",
+        description: `You've liked "${artwork.title}" by ${artwork.artist}`,
+      });
+    }
+    
+    // In a real app, we would update the like in the database
+    console.log(`${isLiked ? 'Unlike' : 'Like'} artwork: ${id}`);
+  };
+  
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!comment.trim()) {
+      toast({
+        title: "Empty comment",
+        description: "Please enter a comment before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Generate a unique ID for the comment (in a real app, this would come from the backend)
+    const newCommentId = `c${Date.now()}`;
+    
+    // Create a new comment object
+    const newComment = {
+      id: newCommentId,
+      user: "Current User", // In a real app, this would be the logged-in user's name
+      userId: "current-user", // In a real app, this would be the logged-in user's ID
+      text: comment,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    
+    // Add the new comment to the comments array
+    setComments(prevComments => [newComment, ...prevComments]);
+    
+    // Clear the comment input
+    setComment('');
+    
+    // Show success toast
+    toast({
+      title: "Comment posted!",
+      description: "Your comment has been added to the artwork.",
+    });
+    
     // In a real app, we would submit the comment to the backend
     console.log('Comment submitted:', comment);
-    setComment('');
   };
   
   return (
@@ -95,6 +153,11 @@ const ArtworkDetail = () => {
                 src={artwork.imageUrl} 
                 alt={artwork.title} 
                 className="w-full h-auto"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80';
+                }}
               />
             </div>
             
@@ -102,9 +165,13 @@ const ArtworkDetail = () => {
               <div>
                 <div className="flex justify-between items-start">
                   <h1 className="text-3xl font-bold text-gallery-darkGray">{artwork.title}</h1>
-                  <Button variant="ghost" className="flex items-center gap-1 rounded-full">
-                    <Heart className="h-5 w-5 text-gallery-purple" />
-                    <span>{artwork.likes}</span>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center gap-1 rounded-full"
+                    onClick={handleLike}
+                  >
+                    <Heart className={`h-5 w-5 ${isLiked ? 'fill-gallery-purple text-gallery-purple' : 'text-gallery-purple'}`} />
+                    <span>{likeCount}</span>
                   </Button>
                 </div>
                 
@@ -120,7 +187,7 @@ const ArtworkDetail = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
-                  <span>{artwork.comments.length} Comments</span>
+                  <span>{comments.length} Comments</span>
                 </div>
               </div>
               
@@ -132,11 +199,32 @@ const ArtworkDetail = () => {
               </div>
               
               <div className="flex gap-3">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    // In a real app, this would open a share dialog
+                    // For now, just show a toast
+                    toast({
+                      title: "Share link copied",
+                      description: "The link to this artwork has been copied to your clipboard.",
+                    });
+                  }}
+                >
                   <Share className="h-4 w-4" />
                   Share
                 </Button>
-                <Button className="bg-gallery-purple hover:bg-opacity-90 flex-1">
+                <Button 
+                  className="bg-gallery-purple hover:bg-opacity-90 flex-1"
+                  onClick={() => {
+                    // In a real app, this would send a message to the artist
+                    // For now, just show a toast
+                    toast({
+                      title: "Message sent",
+                      description: `Your message has been sent to ${artwork.artist}.`,
+                    });
+                  }}
+                >
                   Contact Artist
                 </Button>
               </div>
@@ -171,8 +259,8 @@ const ArtworkDetail = () => {
             
             {/* Comments List */}
             <div className="space-y-6">
-              {artwork.comments.length > 0 ? (
-                artwork.comments.map(comment => (
+              {comments.length > 0 ? (
+                comments.map(comment => (
                   <div key={comment.id} className="neumorph p-5">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">

@@ -1,18 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GalleryHorizontal } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface AuthFormProps {
   type: 'login' | 'register';
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, userType?: string) => void;
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
   const isLogin = type === 'login';
+  const [userType, setUserType] = useState('visitor');
+  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSubmit(e, userType);
+  };
   
   return (
     <div className="mx-auto max-w-md w-full p-6 neumorph">
@@ -26,7 +33,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
         </p>
       </div>
       
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -45,10 +52,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
         </div>
         
         {!isLogin && (
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input id="confirm-password" type="password" placeholder="••••••••" required />
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input id="confirm-password" type="password" placeholder="••••••••" required />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>I am registering as:</Label>
+              <RadioGroup value={userType} onValueChange={setUserType} className="mt-2">
+                <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50">
+                  <RadioGroupItem value="student" id="student" />
+                  <Label htmlFor="student" className="cursor-pointer flex-1">
+                    <div className="font-medium">Student Artist</div>
+                    <p className="text-sm text-gallery-gray">I want to upload artwork</p>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50">
+                  <RadioGroupItem value="visitor" id="visitor" />
+                  <Label htmlFor="visitor" className="cursor-pointer flex-1">
+                    <div className="font-medium">Visitor</div>
+                    <p className="text-sm text-gallery-gray">I want to browse and comment</p>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </>
         )}
         
         <Button type="submit" className="w-full bg-gallery-purple hover:bg-opacity-90">

@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface ArtworkCardProps {
   id: string;
@@ -22,6 +23,36 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
   category,
   likes = 0
 }) => {
+  const [likeCount, setLikeCount] = useState(likes);
+  const [isLiked, setIsLiked] = useState(false);
+  
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Toggle like state
+    if (isLiked) {
+      setLikeCount(prev => prev - 1);
+      setIsLiked(false);
+      toast({
+        title: "Unliked",
+        description: `You've removed your like from "${title}"`,
+        variant: "default",
+      });
+    } else {
+      setLikeCount(prev => prev + 1);
+      setIsLiked(true);
+      toast({
+        title: "Liked!",
+        description: `You've liked "${title}" by ${artist}`,
+        variant: "default",
+      });
+    }
+    
+    // In a real app, we would call an API to update the like in the database
+    console.log(`${isLiked ? 'Unlike' : 'Like'} artwork: ${id}`);
+  };
+  
   return (
     <div className="artwork-card overflow-hidden rounded-lg bg-white">
       <Link to={`/artwork/${id}`}>
@@ -30,6 +61,11 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
             src={imageUrl} 
             alt={title} 
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.onerror = null; // Prevent infinite error loop
+              target.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80';
+            }}
           />
           <div className="absolute top-3 right-3 bg-white bg-opacity-90 px-2 py-1 rounded-full text-xs font-medium text-gallery-darkGray">
             {category}
@@ -49,10 +85,13 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
         </Link>
         
         <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-1 text-sm text-gallery-gray">
-            <Heart className="h-4 w-4" />
-            <span>{likes}</span>
-          </div>
+          <button 
+            onClick={handleLike}
+            className="flex items-center gap-1 text-sm text-gallery-gray hover:text-gallery-purple transition-colors"
+          >
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-gallery-purple text-gallery-purple' : ''}`} />
+            <span>{likeCount}</span>
+          </button>
         </div>
       </div>
     </div>
