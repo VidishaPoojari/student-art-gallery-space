@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Calendar, User } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ArtworkCardProps {
   id: string;
@@ -12,6 +13,7 @@ interface ArtworkCardProps {
   imageUrl: string;
   category: string;
   likes?: number;
+  createdAt?: string;
 }
 
 const ArtworkCard: React.FC<ArtworkCardProps> = ({
@@ -21,7 +23,8 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
   artistId,
   imageUrl,
   category,
-  likes = 0
+  likes = 0,
+  createdAt
 }) => {
   const [likeCount, setLikeCount] = useState(likes);
   const [isLiked, setIsLiked] = useState(false);
@@ -29,6 +32,18 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Check if user is logged in (this would connect to auth state in a real app)
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    
+    if (!isLoggedIn) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to like artworks",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Toggle like state
     if (isLiked) {
@@ -53,8 +68,15 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
     console.log(`${isLiked ? 'Unlike' : 'Like'} artwork: ${id}`);
   };
   
+  // Format date for display
+  const formattedDate = createdAt ? new Date(createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }) : '';
+  
   return (
-    <div className="artwork-card overflow-hidden rounded-lg bg-white">
+    <Card className="artwork-card overflow-hidden rounded-lg bg-white transition-all duration-300 hover:shadow-lg">
       <Link to={`/artwork/${id}`}>
         <div className="relative aspect-[4/3] overflow-hidden">
           <img 
@@ -73,16 +95,22 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
         </div>
       </Link>
       
-      <div className="p-4">
+      <CardContent className="p-4">
         <Link to={`/artwork/${id}`}>
           <h3 className="text-lg font-medium leading-tight mb-1 hover:text-gallery-purple transition-colors line-clamp-1">
             {title}
           </h3>
         </Link>
         
-        <Link to={`/artist/${artistId}`} className="text-sm text-gallery-gray hover:text-gallery-purple transition-colors">
-          by {artist}
+        <Link to={`/artist/${artistId}`} className="text-sm text-gallery-gray hover:text-gallery-purple transition-colors flex items-center gap-1">
+          <User className="h-3 w-3" /> {artist}
         </Link>
+        
+        {formattedDate && (
+          <div className="text-xs text-gallery-gray mt-1 flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> {formattedDate}
+          </div>
+        )}
         
         <div className="mt-3 flex items-center justify-between">
           <button 
@@ -93,8 +121,8 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
             <span>{likeCount}</span>
           </button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

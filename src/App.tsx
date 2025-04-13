@@ -6,7 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Gallery from "./pages/Gallery";
-import ArtworkDetail from "./pages/ArtworkDetail";
+import NewArtworkDetail from "./pages/NewArtworkDetail";
+import ArtistProfile from "./pages/ArtistProfile";
+import UploadArtwork from "./pages/UploadArtwork";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
@@ -22,7 +24,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/artwork/:id" element={<ArtworkDetail />} />
+          <Route path="/artwork/:id" element={<NewArtworkDetail />} />
+          <Route path="/artist/:artistId" element={<ArtistProfile />} />
+          <Route path="/upload" element={<UploadArtwork />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

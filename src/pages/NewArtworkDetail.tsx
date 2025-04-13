@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import NavbarWithAuth from '@/components/NavbarWithAuth';
 import CommentSection from '@/components/CommentSection';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -16,7 +16,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
-// Mock artwork data
+// Mock artwork data - this can be moved to a central data file
 const artworks = [
   {
     id: "1",
@@ -92,7 +92,7 @@ const artworks = [
   }
 ];
 
-const ArtworkDetail = () => {
+const NewArtworkDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [artwork, setArtwork] = useState<any>(null);
@@ -141,6 +141,7 @@ const ArtworkDetail = () => {
         description: "Please log in to like artworks",
         variant: "destructive",
       });
+      navigate('/login');
       return;
     }
     
@@ -191,7 +192,7 @@ const ArtworkDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <NavbarWithAuth />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-gallery-gray">Loading artwork...</p>
@@ -205,7 +206,7 @@ const ArtworkDetail = () => {
   if (!artwork) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <NavbarWithAuth />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Artwork Not Found</h1>
@@ -221,7 +222,7 @@ const ArtworkDetail = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <NavbarWithAuth />
       
       <main className="flex-1 py-10 px-4">
         <div className="container mx-auto max-w-5xl">
@@ -338,4 +339,4 @@ const ArtworkDetail = () => {
   );
 };
 
-export default ArtworkDetail;
+export default NewArtworkDetail;

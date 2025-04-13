@@ -1,108 +1,97 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import ArtworkCard from '@/components/ArtworkCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Calendar } from 'lucide-react';
 
-// Mock data with updated images relevant to their categories
+// Updated mock data with 6 distinct artworks across 3 categories
 const artworks = [
   {
     id: "1",
-    title: "Urban Dreamscape",
-    artist: "Sophia Chen",
+    title: "Village in the Monsoon",
+    artist: "Priya Sharma",
     artistId: "artist1",
-    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-    category: "Digital Art",
-    likes: 87
+    imageUrl: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
+    category: "Painting",
+    likes: 87,
+    createdAt: "2025-01-15"
   },
   {
     id: "2",
-    title: "Serenity in Blue",
+    title: "Fruits of Labor",
     artist: "Marcus Johnson",
     artistId: "artist2",
-    imageUrl: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80",
     category: "Painting",
-    likes: 42
+    likes: 42,
+    createdAt: "2025-02-03"
   },
   {
     id: "3",
-    title: "Geometric Harmony",
+    title: "Study Under the Tree",
     artist: "Aisha Patel",
     artistId: "artist3",
-    imageUrl: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
     category: "Digital Art",
-    likes: 38
+    likes: 38,
+    createdAt: "2025-03-12"
   },
   {
     id: "4",
-    title: "Tranquil Sunset",
+    title: "Neon Metropolis 2077",
     artist: "James Wilson",
     artistId: "artist4",
-    imageUrl: "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
-    category: "Photography",
-    likes: 51
+    imageUrl: "https://images.unsplash.com/photo-1520262454473-a1a82276a574?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1374&q=80",
+    category: "Digital Art",
+    likes: 51,
+    createdAt: "2025-01-28"
   },
   {
     id: "5",
-    title: "Expressionist Portrait",
+    title: "Corridors of Learning",
     artist: "Elena Rodriguez",
     artistId: "artist5",
-    imageUrl: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-    category: "Painting",
-    likes: 64
+    imageUrl: "https://images.unsplash.com/photo-1527576539890-dfa815648363?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
+    category: "Photography",
+    likes: 64,
+    createdAt: "2025-02-19"
   },
   {
     id: "6",
-    title: "Abstract Motion",
+    title: "Street Vendor at Dusk",
     artist: "Devon Park",
     artistId: "artist6",
-    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
-    category: "Digital Art",
-    likes: 73
-  },
-  {
-    id: "7",
-    title: "City at Dusk",
-    artist: "Michael Brown",
-    artistId: "artist7",
-    imageUrl: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1519075677053-4bcc089df102?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80",
     category: "Photography",
-    likes: 45
-  },
-  {
-    id: "8",
-    title: "Nature's Patterns",
-    artist: "Sarah Kim",
-    artistId: "artist8",
-    imageUrl: "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-    category: "Photography",
-    likes: 29
-  },
-  {
-    id: "9",
-    title: "Vibrant Still Life",
-    artist: "Alex Thompson",
-    artistId: "artist9",
-    imageUrl: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-    category: "Painting",
-    likes: 33
+    likes: 73,
+    createdAt: "2025-03-05"
   }
 ];
 
 const Gallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
+  const [dateSort, setDateSort] = useState('newest');
   
-  // Filter artworks based on search term and category
-  const filteredArtworks = artworks.filter(artwork => {
-    const matchesSearch = artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         artwork.artist.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === 'all' || artwork.category === category;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // Filter artworks based on search term, category, and date
+  const filteredArtworks = artworks
+    .filter(artwork => {
+      const matchesSearch = artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           artwork.artist.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = category === 'all' || artwork.category === category;
+      
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (dateSort === 'newest') {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      } else {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+    });
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -123,7 +112,7 @@ const Gallery = () => {
           {/* Search and Filter */}
           <div className="mb-10 neumorph p-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              <div className="relative lg:col-span-7">
+              <div className="relative lg:col-span-5">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gallery-gray" />
                 <Input 
                   placeholder="Search by artwork title or artist name" 
@@ -143,6 +132,18 @@ const Gallery = () => {
                     <SelectItem value="Painting">Painting</SelectItem>
                     <SelectItem value="Digital Art">Digital Art</SelectItem>
                     <SelectItem value="Photography">Photography</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="lg:col-span-2">
+                <Select value={dateSort} onValueChange={setDateSort}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by Date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
