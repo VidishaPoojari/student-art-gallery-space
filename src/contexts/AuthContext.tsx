@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User, 
@@ -52,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast({
         title: "Registration successful!",
-        description: `You've registered as a ${role === 'student' ? 'Student Artist' : role === 'owner' ? 'Gallery Owner' : 'Visitor'}.`,
+        description: `You've registered as a ${role === 'student' ? 'Student Artist' : 'Visitor'}.`,
       });
       
       return;
@@ -144,3 +143,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

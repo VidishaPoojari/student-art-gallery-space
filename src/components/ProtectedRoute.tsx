@@ -27,8 +27,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/login" />;
   }
   
-  // If a specific role is required and user doesn't have it, redirect to gallery
-  if (requiredRole && userRole !== requiredRole && userRole !== 'owner') {
+  // If a specific role is required and user doesn't have it
+  if (requiredRole && userRole !== requiredRole) {
     toast({
       title: "Access Denied",
       description: `Only ${requiredRole === 'student' ? 'student artists' : requiredRole} can access this page`,

@@ -76,13 +76,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit, isLoading = false }
                     <p className="text-sm text-gallery-gray">I want to browse and comment</p>
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50">
-                  <RadioGroupItem value="owner" id="owner" />
-                  <Label htmlFor="owner" className="cursor-pointer flex-1">
-                    <div className="font-medium">Gallery Owner</div>
-                    <p className="text-sm text-gallery-gray">I want to manage the gallery</p>
-                  </Label>
-                </div>
               </RadioGroup>
             </div>
           </>

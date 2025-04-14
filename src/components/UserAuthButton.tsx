@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar } from '@/components/ui/avatar';
-import { LogOut, Upload, User, Settings } from 'lucide-react';
+import { LogOut, Upload, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const UserAuthButton = () => {
@@ -61,7 +61,7 @@ const UserAuthButton = () => {
           <div className="flex flex-col space-y-0.5">
             <p className="text-sm font-medium">User Account</p>
             <p className="text-xs text-muted-foreground">
-              Role: {userRole === 'student' ? 'Student Artist' : userRole === 'owner' ? 'Owner' : 'Visitor'}
+              Role: {userRole === 'student' ? 'Student Artist' : 'Visitor'}
             </p>
           </div>
         </div>
@@ -80,15 +80,6 @@ const UserAuthButton = () => {
             <Link to="/upload" className="cursor-pointer">
               <Upload className="mr-2 h-4 w-4" />
               <span>Upload Artwork</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-        
-        {userRole === 'owner' && (
-          <DropdownMenuItem asChild>
-            <Link to="/admin" className="cursor-pointer">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Admin Dashboard</span>
             </Link>
           </DropdownMenuItem>
         )}
