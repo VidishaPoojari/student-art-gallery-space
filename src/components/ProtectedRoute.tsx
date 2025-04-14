@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   if (requiredRole && userRole !== requiredRole) {
     toast({
       title: "Access Denied",
-      description: `Only ${requiredRole === 'student' ? 'student artists' : requiredRole} can access this page`,
+      description: `Only ${requiredRole === 'student' ? 'student artists' : 'visitors'} can access this page`,
       variant: "destructive",
     });
     return <Navigate to="/gallery" />;

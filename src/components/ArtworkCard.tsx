@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Heart, Calendar, User } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
+import { likeArtwork, unlikeArtwork } from '@/services/artworkService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ArtworkCardProps {
   id: string;
@@ -28,15 +30,14 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
 }) => {
   const [likeCount, setLikeCount] = useState(likes);
   const [isLiked, setIsLiked] = useState(false);
+  const { currentUser } = useAuth();
   
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Check if user is logged in (this would connect to auth state in a real app)
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
-    if (!isLoggedIn) {
+    // Check if user is logged in
+    if (!currentUser) {
       toast({
         title: "Authentication Required",
         description: "Please log in to like artworks",
@@ -45,27 +46,35 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({
       return;
     }
     
-    // Toggle like state
-    if (isLiked) {
-      setLikeCount(prev => prev - 1);
-      setIsLiked(false);
+    try {
+      // Toggle like state
+      if (isLiked) {
+        await unlikeArtwork(id);
+        setLikeCount(prev => prev - 1);
+        setIsLiked(false);
+        toast({
+          title: "Unliked",
+          description: `You've removed your like from "${title}"`,
+          variant: "default",
+        });
+      } else {
+        await likeArtwork(id);
+        setLikeCount(prev => prev + 1);
+        setIsLiked(true);
+        toast({
+          title: "Liked!",
+          description: `You've liked "${title}" by ${artist}`,
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
       toast({
-        title: "Unliked",
-        description: `You've removed your like from "${title}"`,
-        variant: "default",
-      });
-    } else {
-      setLikeCount(prev => prev + 1);
-      setIsLiked(true);
-      toast({
-        title: "Liked!",
-        description: `You've liked "${title}" by ${artist}`,
-        variant: "default",
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
       });
     }
-    
-    // In a real app, we would call an API to update the like in the database
-    console.log(`${isLiked ? 'Unlike' : 'Like'} artwork: ${id}`);
   };
   
   // Format date for display

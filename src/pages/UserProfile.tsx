@@ -8,12 +8,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getArtworksByArtist } from '@/services/artworkService';
 import { Artwork } from '@/services/artworkService';
 import { getUserById } from '@/services/userService';
+import { seedFirebaseData } from '@/services/seedFirebaseData';
+import { toast } from '@/components/ui/use-toast';
+import { Database } from 'lucide-react';
 
 const UserProfile = () => {
   const { currentUser, userRole } = useAuth();
   const [userArtworks, setUserArtworks] = useState<Artwork[]>([]);
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -40,6 +44,35 @@ const UserProfile = () => {
     
     fetchUserData();
   }, [currentUser, userRole]);
+  
+  const handleSeedData = async () => {
+    setSeeding(true);
+    try {
+      const result = await seedFirebaseData();
+      if (result.success) {
+        toast({
+          title: "Data Seeding Complete",
+          description: "Mock artworks and comments have been added to Firebase",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Data Seeding Issue",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error seeding data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to seed data to Firebase",
+        variant: "destructive",
+      });
+    } finally {
+      setSeeding(false);
+    }
+  };
   
   if (loading) {
     return (
@@ -69,18 +102,28 @@ const UserProfile = () => {
               <div className="flex-1 text-center md:text-left">
                 <h1 className="text-2xl font-bold text-gallery-darkGray">{userName}</h1>
                 <p className="text-gallery-gray mb-4">
-                  Role: {userRole === 'student' ? 'Student Artist' : userRole === 'owner' ? 'Gallery Owner' : 'Visitor'}
+                  Role: {userRole === 'student' ? 'Student Artist' : 'Visitor'}
                 </p>
                 
-                {userRole === 'student' && (
-                  <div className="mt-4">
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  {userRole === 'student' && (
                     <Link to="/upload">
                       <Button className="bg-gallery-purple hover:bg-opacity-90">
                         Upload New Artwork
                       </Button>
                     </Link>
-                  </div>
-                )}
+                  )}
+                  
+                  <Button 
+                    onClick={handleSeedData} 
+                    disabled={seeding}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Database className="h-4 w-4" />
+                    {seeding ? 'Adding to Firebase...' : 'Add Mock Data to Firebase'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
