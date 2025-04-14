@@ -10,9 +10,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 interface AuthFormProps {
   type: 'login' | 'register';
   onSubmit: (e: React.FormEvent<HTMLFormElement>, userType?: string) => void;
+  isLoading?: boolean;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit, isLoading = false }) => {
   const isLogin = type === 'login';
   const [userType, setUserType] = useState('visitor');
   
@@ -80,8 +81,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
           </>
         )}
         
-        <Button type="submit" className="w-full bg-gallery-purple hover:bg-opacity-90">
-          {isLogin ? 'Log In' : 'Sign Up'}
+        <Button type="submit" className="w-full bg-gallery-purple hover:bg-opacity-90" disabled={isLoading}>
+          {isLoading ? 'Processing...' : (isLogin ? 'Log In' : 'Sign Up')}
         </Button>
         
         <div className="text-center text-sm mt-4">
