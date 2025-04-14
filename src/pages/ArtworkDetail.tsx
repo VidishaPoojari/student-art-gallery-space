@@ -10,9 +10,9 @@ import {
   getArtworkById, 
   likeArtwork, 
   unlikeArtwork, 
-  deleteArtwork 
+  deleteArtwork,
+  Artwork 
 } from '@/services/artworkService';
-import { Artwork } from '@/services/artworkService';
 import { 
   Heart, 
   Share, 
@@ -39,11 +39,15 @@ const ArtworkDetail = () => {
       
       setIsLoading(true);
       try {
+        console.log("Fetching artwork with ID:", id);
         const fetchedArtwork = await getArtworkById(id);
+        console.log("Fetched artwork:", fetchedArtwork);
         
         if (fetchedArtwork) {
           setArtwork(fetchedArtwork);
           setLikeCount(fetchedArtwork.likes);
+        } else {
+          console.log("No artwork found with ID:", id);
         }
       } catch (error) {
         console.error('Error fetching artwork:', error);

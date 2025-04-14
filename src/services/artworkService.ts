@@ -28,6 +28,76 @@ export interface Artwork {
   likes: number;
 }
 
+// Mock data for offline testing when Firebase might not be connected
+export const mockArtworks: Artwork[] = [
+  {
+    id: "1",
+    title: "Village in the Monsoon",
+    artist: "Priya Sharma",
+    artistId: "artist1",
+    imageUrl: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
+    category: "Painting",
+    description: "A watercolor painting depicting a serene village landscape during the monsoon season. The misty atmosphere and gentle rain create a peaceful mood, showcasing the beauty of rural life during the rainy season.",
+    likes: 87,
+    createdAt: "2025-01-15"
+  },
+  {
+    id: "2",
+    title: "Fruits of Labor",
+    artist: "Marcus Johnson",
+    artistId: "artist2",
+    imageUrl: "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80",
+    category: "Painting",
+    description: "An oil painting study of a classic still life arrangement featuring seasonal fruits, a ceramic vase, and elegantly draped cloth. The play of light and shadow demonstrates traditional techniques while bringing a fresh perspective to a timeless subject.",
+    likes: 42,
+    createdAt: "2025-02-03"
+  },
+  {
+    id: "3",
+    title: "Study Under the Tree",
+    artist: "Aisha Patel",
+    artistId: "artist3",
+    imageUrl: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
+    category: "Digital Art",
+    description: "A stylized digital illustration capturing a peaceful moment of a young woman studying under the shade of a large tree as the sun sets in the background. The warm colors and gentle composition evoke a sense of tranquility and focus amid nature.",
+    likes: 38,
+    createdAt: "2025-03-12"
+  },
+  {
+    id: "4",
+    title: "Neon Metropolis 2077",
+    artist: "James Wilson",
+    artistId: "artist4",
+    imageUrl: "https://images.unsplash.com/photo-1520262454473-a1a82276a574?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1374&q=80",
+    category: "Digital Art",
+    description: "A vibrant digital artwork depicting a futuristic cityscape bathed in neon lights. Towering skyscrapers, flying vehicles, and holographic advertisements create an immersive sci-fi world inspired by cyberpunk aesthetics.",
+    likes: 51,
+    createdAt: "2025-01-28"
+  },
+  {
+    id: "5",
+    title: "Corridors of Learning",
+    artist: "Elena Rodriguez",
+    artistId: "artist5",
+    imageUrl: "https://images.unsplash.com/photo-1527576539890-dfa815648363?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
+    category: "Photography",
+    description: "A candid black and white photograph capturing students walking through the architectural corridors of a university building. The interplay of light, shadow, and human movement creates a compelling visual narrative about academic life.",
+    likes: 64,
+    createdAt: "2025-02-19"
+  },
+  {
+    id: "6",
+    title: "Street Vendor at Dusk",
+    artist: "Devon Park",
+    artistId: "artist6",
+    imageUrl: "https://images.unsplash.com/photo-1519075677053-4bcc089df102?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80",
+    category: "Photography",
+    description: "A high-contrast color photograph capturing the vibrant atmosphere of a street food vendor's stall at dusk. The warm glow of the vendor's lights against the darkening sky creates a dramatic scene filled with color, life, and cultural richness.",
+    likes: 73,
+    createdAt: "2025-03-05"
+  }
+];
+
 // Convert Firestore document to Artwork type
 const convertArtwork = (doc: QueryDocumentSnapshot): Artwork => {
   const data = doc.data();
@@ -56,13 +126,22 @@ export const getArtworks = async (): Promise<Artwork[]> => {
     return querySnapshot.docs.map(convertArtwork);
   } catch (error) {
     console.error('Error getting artworks:', error);
-    throw error;
+    // Return mock data as fallback
+    return mockArtworks;
   }
 };
 
 // Get artwork by ID
 export const getArtworkById = async (id: string): Promise<Artwork | null> => {
   try {
+    // First check in mock data (for development/offline mode)
+    const mockArtwork = mockArtworks.find(artwork => artwork.id === id);
+    if (mockArtwork) {
+      console.log('Using mock artwork data for id:', id);
+      return mockArtwork;
+    }
+    
+    // Otherwise try to get from Firestore
     const docRef = doc(db, 'artworks', id);
     const docSnap = await getDoc(docRef);
     
@@ -84,7 +163,9 @@ export const getArtworkById = async (id: string): Promise<Artwork | null> => {
     return null;
   } catch (error) {
     console.error('Error getting artwork:', error);
-    throw error;
+    // Return mock data as fallback (if available)
+    const mockArtwork = mockArtworks.find(artwork => artwork.id === id);
+    return mockArtwork || null;
   }
 };
 
