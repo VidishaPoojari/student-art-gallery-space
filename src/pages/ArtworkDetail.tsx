@@ -150,8 +150,7 @@ const ArtworkDetail = () => {
   
   // Check if current user is the artwork creator
   const isCreator = currentUser && artwork && currentUser.uid === artwork.artistId;
-  const isOwner = userRole === 'owner';
-  const canModerate = isCreator || isOwner;
+  const canModerate = isCreator;
   
   // Show loading state
   if (isLoading) {
@@ -274,8 +273,8 @@ const ArtworkDetail = () => {
                     </Button>
                   )}
                   
-                  {/* Delete button (for artwork creator or owner/admin) */}
-                  {canModerate && (
+                  {/* Delete button (for artwork creator only) */}
+                  {isCreator && (
                     <Button 
                       variant="outline" 
                       className="flex items-center gap-2 text-red-600"
