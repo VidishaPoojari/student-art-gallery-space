@@ -5,6 +5,14 @@ import Navbar from '@/components/Navbar';
 import CommentSection from '@/components/CommentSection';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { 
+  getArtworkById, 
+  likeArtwork, 
+  unlikeArtwork, 
+  deleteArtwork 
+} from '@/services/artworkService';
+import { Artwork } from '@/services/artworkService';
 import { 
   Heart, 
   Share, 
@@ -16,112 +24,40 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
-// Mock artwork data
-const artworks = [
-  {
-    id: "1",
-    title: "Village in the Monsoon",
-    artist: "Priya Sharma",
-    artistId: "artist1",
-    imageUrl: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-    category: "Painting",
-    description: "A watercolor painting depicting a serene village landscape during the monsoon season. The misty atmosphere and gentle rain create a peaceful mood, showcasing the beauty of rural life during the rainy season.",
-    likes: 87,
-    createdAt: "2025-01-15",
-    createdBy: "student1"
-  },
-  {
-    id: "2",
-    title: "Fruits of Labor",
-    artist: "Marcus Johnson",
-    artistId: "artist2",
-    imageUrl: "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80",
-    category: "Painting",
-    description: "An oil painting study of a classic still life arrangement featuring seasonal fruits, a ceramic vase, and elegantly draped cloth. The play of light and shadow demonstrates traditional techniques while bringing a fresh perspective to a timeless subject.",
-    likes: 42,
-    createdAt: "2025-02-03",
-    createdBy: "student2"
-  },
-  {
-    id: "3",
-    title: "Study Under the Tree",
-    artist: "Aisha Patel",
-    artistId: "artist3",
-    imageUrl: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-    category: "Digital Art",
-    description: "A stylized digital illustration capturing a peaceful moment of a young woman studying under the shade of a large tree as the sun sets in the background. The warm colors and gentle composition evoke a sense of tranquility and focus amid nature.",
-    likes: 38,
-    createdAt: "2025-03-12",
-    createdBy: "student3"
-  },
-  {
-    id: "4",
-    title: "Neon Metropolis 2077",
-    artist: "James Wilson",
-    artistId: "artist4",
-    imageUrl: "https://images.unsplash.com/photo-1520262454473-a1a82276a574?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1374&q=80",
-    category: "Digital Art",
-    description: "A vibrant digital artwork depicting a futuristic cityscape bathed in neon lights. Towering skyscrapers, flying vehicles, and holographic advertisements create an immersive sci-fi world inspired by cyberpunk aesthetics.",
-    likes: 51,
-    createdAt: "2025-01-28",
-    createdBy: "student4"
-  },
-  {
-    id: "5",
-    title: "Corridors of Learning",
-    artist: "Elena Rodriguez",
-    artistId: "artist5",
-    imageUrl: "https://images.unsplash.com/photo-1527576539890-dfa815648363?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
-    category: "Photography",
-    description: "A candid black and white photograph capturing students walking through the architectural corridors of a university building. The interplay of light, shadow, and human movement creates a compelling visual narrative about academic life.",
-    likes: 64,
-    createdAt: "2025-02-19",
-    createdBy: "student5"
-  },
-  {
-    id: "6",
-    title: "Street Vendor at Dusk",
-    artist: "Devon Park",
-    artistId: "artist6",
-    imageUrl: "https://images.unsplash.com/photo-1519075677053-4bcc089df102?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80",
-    category: "Photography",
-    description: "A high-contrast color photograph capturing the vibrant atmosphere of a street food vendor's stall at dusk. The warm glow of the vendor's lights against the darkening sky creates a dramatic scene filled with color, life, and cultural richness.",
-    likes: 73,
-    createdAt: "2025-03-05",
-    createdBy: "student6"
-  }
-];
-
 const ArtworkDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [artwork, setArtwork] = useState<any>(null);
+  const { currentUser, userRole } = useAuth();
+  const [artwork, setArtwork] = useState<Artwork | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   
-  // In a real app, these would come from authentication context
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userId = localStorage.getItem('userId') || '';
-  const userRole = localStorage.getItem('userRole');
-  const isOwner = userRole === 'owner';
-  
   useEffect(() => {
-    // In a real app, this would fetch from Firebase/Supabase
-    // Simulating API call with setTimeout
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const foundArtwork = artworks.find(artwork => artwork.id === id);
+    const fetchArtwork = async () => {
+      if (!id) return;
       
-      if (foundArtwork) {
-        setArtwork(foundArtwork);
-        setLikeCount(foundArtwork.likes);
+      setIsLoading(true);
+      try {
+        const fetchedArtwork = await getArtworkById(id);
+        
+        if (fetchedArtwork) {
+          setArtwork(fetchedArtwork);
+          setLikeCount(fetchedArtwork.likes);
+        }
+      } catch (error) {
+        console.error('Error fetching artwork:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load artwork details",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    }, 500);
+    };
     
-    return () => clearTimeout(timer);
+    fetchArtwork();
   }, [id]);
   
   // Format date for display
@@ -134,8 +70,8 @@ const ArtworkDetail = () => {
   };
   
   // Handle like button click
-  const handleLike = () => {
-    if (!isLoggedIn) {
+  const handleLike = async () => {
+    if (!currentUser) {
       toast({
         title: "Authentication Required",
         description: "Please log in to like artworks",
@@ -144,27 +80,39 @@ const ArtworkDetail = () => {
       return;
     }
     
-    // Toggle like state
-    if (isLiked) {
-      setLikeCount(prev => prev - 1);
-      setIsLiked(false);
+    if (!artwork) return;
+    
+    try {
+      // Toggle like state
+      if (isLiked) {
+        await unlikeArtwork(artwork.id);
+        setLikeCount(prev => prev - 1);
+        setIsLiked(false);
+        toast({
+          title: "Unliked",
+          description: `You've removed your like from "${artwork.title}"`,
+        });
+      } else {
+        await likeArtwork(artwork.id);
+        setLikeCount(prev => prev + 1);
+        setIsLiked(true);
+        toast({
+          title: "Liked!",
+          description: `You've liked "${artwork.title}" by ${artwork.artist}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
       toast({
-        title: "Unliked",
-        description: `You've removed your like from "${artwork.title}"`,
-      });
-    } else {
-      setLikeCount(prev => prev + 1);
-      setIsLiked(true);
-      toast({
-        title: "Liked!",
-        description: `You've liked "${artwork.title}" by ${artwork.artist}`,
+        title: "Error",
+        description: "Failed to process your like",
+        variant: "destructive",
       });
     }
   };
   
   // Handle share button click
   const handleShare = () => {
-    // In a real app, this would use the Web Share API or copy to clipboard
     navigator.clipboard.writeText(window.location.href);
     
     toast({
@@ -174,18 +122,32 @@ const ArtworkDetail = () => {
   };
   
   // Handle delete artwork
-  const handleDeleteArtwork = () => {
-    // In a real app, this would delete from Firebase/Supabase
-    toast({
-      title: "Artwork Deleted",
-      description: "The artwork has been removed from the gallery",
-    });
+  const handleDeleteArtwork = async () => {
+    if (!artwork) return;
     
-    navigate('/gallery');
+    try {
+      await deleteArtwork(artwork.id);
+      
+      toast({
+        title: "Artwork Deleted",
+        description: "The artwork has been removed from the gallery",
+      });
+      
+      navigate('/gallery');
+    } catch (error) {
+      console.error('Error deleting artwork:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the artwork",
+        variant: "destructive",
+      });
+    }
   };
   
   // Check if current user is the artwork creator
-  const isCreator = userId === artwork?.createdBy;
+  const isCreator = currentUser && artwork && currentUser.uid === artwork.artistId;
+  const isOwner = userRole === 'owner';
+  const canModerate = isCreator || isOwner;
   
   // Show loading state
   if (isLoading) {
@@ -309,7 +271,7 @@ const ArtworkDetail = () => {
                   )}
                   
                   {/* Delete button (for artwork creator or owner/admin) */}
-                  {(isCreator || isOwner) && (
+                  {canModerate && (
                     <Button 
                       variant="outline" 
                       className="flex items-center gap-2 text-red-600"
@@ -331,7 +293,7 @@ const ArtworkDetail = () => {
       
       <footer className="bg-white py-6 px-4 border-t mt-10">
         <div className="container mx-auto text-center text-gallery-gray">
-          <p>© 2025 StudentArt Gallery. All rights reserved.</p>
+          <p>© 2025 Virtual Art Gallery for Student Exhibitions. All rights reserved.</p>
         </div>
       </footer>
     </div>

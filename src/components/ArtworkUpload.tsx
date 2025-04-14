@@ -25,26 +25,25 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, ImagePlus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { createArtwork } from '@/services/artworkService';
+import { getUserById } from '@/services/userService';
 
 // Define form schema
 const artworkFormSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   category: z.string().min(1, 'Please select a category'),
-  image: z.instanceof(File).refine(
-    (file) => file.size <= 5 * 1024 * 1024, // 5MB limit
-    'Image must be less than 5MB'
-  ).refine(
-    (file) => ['image/jpeg', 'image/png', 'image/gif'].includes(file.type),
-    'Only JPEG, PNG, and GIF formats are accepted'
-  ),
 });
 
 type ArtworkFormValues = z.infer<typeof artworkFormSchema>;
 
 const ArtworkUpload: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Define form
   const form = useForm<ArtworkFormValues>({
@@ -61,8 +60,27 @@ const ArtworkUpload: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Set file in form
-    form.setValue('image', file);
+    // Validate file size
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Image Too Large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only JPEG, PNG, and GIF formats are accepted",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setImageFile(file);
     
     // Create preview URL
     const reader = new FileReader();
@@ -73,18 +91,57 @@ const ArtworkUpload: React.FC = () => {
   };
   
   // Handle form submission
-  const onSubmit = (values: ArtworkFormValues) => {
-    // In a real app, this would upload to Firebase/Supabase
-    console.log('Artwork to upload:', values);
+  const onSubmit = async (values: ArtworkFormValues) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to upload artwork",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Mock successful upload
-    toast({
-      title: "Artwork Uploaded!",
-      description: `Your artwork "${values.title}" has been successfully uploaded.`,
-    });
+    if (!imageFile) {
+      toast({
+        title: "Image Required",
+        description: "Please select an image for your artwork",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Redirect to gallery
-    navigate('/gallery');
+    setIsSubmitting(true);
+    
+    try {
+      // Get user's name
+      const userProfile = await getUserById(currentUser.uid);
+      const artistName = userProfile?.name || 'Anonymous Artist';
+      
+      // Create artwork in Firestore and upload image
+      const artworkId = await createArtwork(
+        values,
+        imageFile,
+        currentUser.uid,
+        artistName
+      );
+      
+      toast({
+        title: "Artwork Uploaded!",
+        description: `Your artwork "${values.title}" has been successfully uploaded.`,
+      });
+      
+      // Redirect to the artwork detail page
+      navigate(`/artwork/${artworkId}`);
+    } catch (error) {
+      console.error('Error uploading artwork:', error);
+      toast({
+        title: "Upload Failed",
+        description: "There was an error uploading your artwork. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -101,7 +158,7 @@ const ArtworkUpload: React.FC = () => {
               <FormLabel>Artwork Image</FormLabel>
               <div 
                 className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors ${
-                  form.formState.errors.image ? 'border-red-500' : 'border-gray-300'
+                  !imageFile ? 'border-gray-300' : 'border-gallery-purple'
                 }`}
                 onClick={() => document.getElementById('artwork-upload')?.click()}
               >
@@ -129,8 +186,8 @@ const ArtworkUpload: React.FC = () => {
                   onChange={handleImageChange}
                 />
               </div>
-              {form.formState.errors.image && (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.image.message}</p>
+              {!imageFile && form.formState.isSubmitted && (
+                <p className="text-sm font-medium text-destructive">Please upload an image</p>
               )}
             </div>
             
@@ -199,10 +256,10 @@ const ArtworkUpload: React.FC = () => {
             <Button 
               type="submit" 
               className="w-full bg-gallery-purple hover:bg-opacity-90"
-              disabled={form.formState.isSubmitting}
+              disabled={isSubmitting}
             >
               <Upload className="mr-2 h-4 w-4" />
-              {form.formState.isSubmitting ? 'Uploading...' : 'Upload Artwork'}
+              {isSubmitting ? 'Uploading...' : 'Upload Artwork'}
             </Button>
           </form>
         </Form>

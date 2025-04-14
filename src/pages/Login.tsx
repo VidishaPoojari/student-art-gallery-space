@@ -3,51 +3,30 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import AuthForm from '@/components/AuthForm';
-import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     
-    // Demo auth logic - in a real app this would verify with Firebase/Supabase
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     
-    // Simple validation for demo
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please enter both email and password",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-    
-    // Simulate authentication
-    setTimeout(() => {
-      // Store auth state in localStorage for demo purposes
-      // In a real app, this would be managed by Firebase/Supabase Auth
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userId', 'user123');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userRole', email.includes('student') ? 'student' : email.includes('owner') ? 'owner' : 'visitor');
-      
-      toast({
-        title: "Login Successful",
-        description: "You are now logged in",
-      });
-      
-      // Redirect to gallery
+    try {
+      await login(email, password);
       navigate('/gallery');
+    } catch (error) {
+      // Error toast is handled in the login function
+      console.error('Login error:', error);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
   
   return (
@@ -64,7 +43,7 @@ const Login = () => {
       
       <footer className="bg-white py-6 px-4 border-t">
         <div className="container mx-auto text-center text-gallery-gray">
-          <p>© 2025 StudentArt Gallery. All rights reserved.</p>
+          <p>© 2025 Virtual Art Gallery for Student Exhibitions. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,43 +11,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar } from '@/components/ui/avatar';
 import { LogOut, Upload, User, Settings } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const UserAuthButton = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { currentUser, userRole, logout } = useAuth();
   const navigate = useNavigate();
   
-  // Check authentication status (would use auth context in a real app)
-  useEffect(() => {
-    const authStatus = localStorage.getItem('isLoggedIn') === 'true';
-    const role = localStorage.getItem('userRole');
-    
-    setIsLoggedIn(authStatus);
-    setUserRole(role);
-  }, []);
-  
   // Handle logout
-  const handleLogout = () => {
-    // In a real app, this would sign out from Firebase/Supabase
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userRole');
-    
-    setIsLoggedIn(false);
-    setUserRole(null);
-    
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
-    });
-    
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
   
   // If not logged in, show login and register buttons
-  if (!isLoggedIn) {
+  if (!currentUser) {
     return (
       <div className="flex gap-2">
         <Link to="/login">

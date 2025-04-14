@@ -38,25 +38,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit, isLoading = false }
         {!isLogin && (
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" type="text" placeholder="John Doe" required />
+            <Input id="name" name="name" type="text" placeholder="John Doe" required />
           </div>
         )}
         
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="john@example.com" required />
+          <Input id="email" name="email" type="email" placeholder="john@example.com" required />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" placeholder="••••••••" required />
+          <Input id="password" name="password" type="password" placeholder="••••••••" required />
         </div>
         
         {!isLogin && (
           <>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input id="confirm-password" type="password" placeholder="••••••••" required />
+              <Input id="confirm-password" name="confirmPassword" type="password" placeholder="••••••••" required />
             </div>
             
             <div className="space-y-2">
@@ -74,6 +74,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit, isLoading = false }
                   <Label htmlFor="visitor" className="cursor-pointer flex-1">
                     <div className="font-medium">Visitor</div>
                     <p className="text-sm text-gallery-gray">I want to browse and comment</p>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50">
+                  <RadioGroupItem value="owner" id="owner" />
+                  <Label htmlFor="owner" className="cursor-pointer flex-1">
+                    <div className="font-medium">Gallery Owner</div>
+                    <p className="text-sm text-gallery-gray">I want to manage the gallery</p>
                   </Label>
                 </div>
               </RadioGroup>
