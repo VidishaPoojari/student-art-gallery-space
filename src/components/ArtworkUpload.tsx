@@ -36,7 +36,12 @@ const artworkFormSchema = z.object({
   category: z.string().min(1, 'Please select a category'),
 });
 
-type ArtworkFormValues = z.infer<typeof artworkFormSchema>;
+// This ensures the type has required properties, not optional ones
+type ArtworkFormValues = {
+  title: string;
+  description: string;
+  category: string;
+};
 
 const ArtworkUpload: React.FC = () => {
   const navigate = useNavigate();
@@ -118,6 +123,7 @@ const ArtworkUpload: React.FC = () => {
       const artistName = userProfile?.name || 'Anonymous Artist';
       
       // Create artwork in Firestore and upload image
+      // Now values has the correct type with required properties
       const artworkId = await createArtwork(
         values,
         imageFile,
