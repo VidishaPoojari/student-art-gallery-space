@@ -8,16 +8,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getArtworksByArtist } from '@/services/artworkService';
 import { Artwork } from '@/services/artworkService';
 import { getUserById } from '@/services/userService';
-import { seedFirebaseData } from '@/services/seedFirebaseData';
-import { toast } from '@/components/ui/use-toast';
-import { Database } from 'lucide-react';
 
 const UserProfile = () => {
   const { currentUser, userRole } = useAuth();
   const [userArtworks, setUserArtworks] = useState<Artwork[]>([]);
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -44,35 +40,6 @@ const UserProfile = () => {
     
     fetchUserData();
   }, [currentUser, userRole]);
-  
-  const handleSeedData = async () => {
-    setSeeding(true);
-    try {
-      const result = await seedFirebaseData();
-      if (result.success) {
-        toast({
-          title: "Data Seeding Complete",
-          description: "Mock artworks and comments have been added to Firebase",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Data Seeding Issue",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error seeding data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to seed data to Firebase",
-        variant: "destructive",
-      });
-    } finally {
-      setSeeding(false);
-    }
-  };
   
   if (loading) {
     return (
@@ -113,16 +80,6 @@ const UserProfile = () => {
                       </Button>
                     </Link>
                   )}
-                  
-                  <Button 
-                    onClick={handleSeedData} 
-                    disabled={seeding}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <Database className="h-4 w-4" />
-                    {seeding ? 'Adding to Firebase...' : 'Add Mock Data to Firebase'}
-                  </Button>
                 </div>
               </div>
             </div>
