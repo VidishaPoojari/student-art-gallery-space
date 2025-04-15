@@ -1,3 +1,4 @@
+
 import { 
   collection, 
   addDoc, 
@@ -15,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import { toast } from '@/components/ui/use-toast';
 
 export interface Artwork {
   id: string;
@@ -109,24 +111,39 @@ const convertArtwork = (doc: QueryDocumentSnapshot): Artwork => {
     imageUrl: data.imageUrl,
     artistId: data.artistId,
     artist: data.artist,
-    createdAt: data.createdAt.toDate().toISOString(),
+    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
     likes: data.likes || 0
   };
 };
 
-// Get all artworks
+// Get all artworks - Modified to ensure it always returns data
 export const getArtworks = async (): Promise<Artwork[]> => {
   try {
+    // Try to fetch from Firestore
     const artworksQuery = query(
       collection(db, 'artworks'),
       orderBy('createdAt', 'desc')
     );
     
     const querySnapshot = await getDocs(artworksQuery);
-    return querySnapshot.docs.map(convertArtwork);
+    
+    // If we got results from Firestore, return them
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs.map(convertArtwork);
+    }
+    
+    console.log('No artworks found in Firestore, using mock data');
+    // If Firestore returned empty results, return mock data
+    return mockArtworks;
   } catch (error) {
     console.error('Error getting artworks:', error);
-    // Return mock data as fallback
+    // Toast the error to notify user
+    toast({
+      title: "Could not load artworks from Firebase",
+      description: "Using default artwork samples instead",
+      variant: "destructive",
+    });
+    // On any error, return mock data as fallback
     return mockArtworks;
   }
 };

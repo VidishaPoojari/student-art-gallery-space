@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import ArtworkCard from '@/components/ArtworkCard';
@@ -6,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { getArtworks, Artwork } from '@/services/artworkService';
+import { getArtworks, Artwork, mockArtworks } from '@/services/artworkService';
+import { toast } from '@/components/ui/use-toast';
 
 const Gallery = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -16,23 +16,22 @@ const Gallery = () => {
   const [dateSort, setDateSort] = useState('newest');
   const [isLoading, setIsLoading] = useState(true);
   
-  // Fetch artworks from Firestore
+  // Fetch artworks from Firestore or use mock data
   useEffect(() => {
     const fetchArtworks = async () => {
       setIsLoading(true);
       try {
         const fetchedArtworks = await getArtworks();
-        
-        // If no artworks are returned, use the predefined mock data
-        if (fetchedArtworks.length === 0) {
-          setArtworks(getDefaultArtworks());
-        } else {
-          setArtworks(fetchedArtworks);
-        }
+        setArtworks(fetchedArtworks);
       } catch (error) {
-        console.error('Error fetching artworks:', error);
-        // Use default artworks if fetch fails
-        setArtworks(getDefaultArtworks());
+        console.error('Error in Gallery component fetching artworks:', error);
+        // If all else fails, use mock data directly
+        setArtworks(mockArtworks);
+        toast({
+          title: "Error loading artworks",
+          description: "Displaying sample artworks instead",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -76,83 +75,6 @@ const Gallery = () => {
     
     setFilteredArtworks(result);
   }, [artworks, searchTerm, category, dateSort]);
-  
-  // Function to generate default artworks if no data exists
-  const getDefaultArtworks = (): Artwork[] => {
-    return [
-      {
-        id: "1",
-        title: "Village in the Monsoon",
-        artist: "Priya Sharma",
-        artistId: "artist1",
-        imageUrl: "https://images.unsplash.com/photo-1433086966358-54859d0ed716",
-        category: "Painting",
-        description: "A watercolor painting depicting a serene village landscape during the monsoon season. The misty atmosphere and gentle rain create a peaceful mood, showcasing the beauty of rural life during the rainy season.",
-        likes: 87,
-        createdAt: "2025-01-15"
-      },
-      {
-        id: "2",
-        title: "Fruits of Labor",
-        artist: "Marcus Johnson",
-        artistId: "artist2",
-        imageUrl: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
-        category: "Painting",
-        description: "An oil painting study of a classic still life arrangement featuring seasonal fruits, a ceramic vase, and elegantly draped cloth. The play of light and shadow demonstrates traditional techniques while bringing a fresh perspective to a timeless subject.",
-        likes: 42,
-        createdAt: "2025-02-03"
-      },
-      {
-        id: "3",
-        title: "Study Under the Tree",
-        artist: "Aisha Patel",
-        artistId: "artist3",
-        imageUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843",
-        category: "Digital Art",
-        description: "A stylized digital illustration capturing a peaceful moment of a young woman studying under the shade of a large tree as the sun sets in the background. The warm colors and gentle composition evoke a sense of tranquility and focus amid nature.",
-        likes: 38,
-        createdAt: "2025-03-12"
-      },
-      {
-        id: "4",
-        title: "Neon Metropolis 2077",
-        artist: "James Wilson",
-        artistId: "artist4",
-        imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
-        category: "Digital Art",
-        description: "A vibrant digital artwork depicting a futuristic cityscape bathed in neon lights. Towering skyscrapers, flying vehicles, and holographic advertisements create an immersive sci-fi world inspired by cyberpunk aesthetics.",
-        likes: 51,
-        createdAt: "2025-01-28"
-      },
-      {
-        id: "5",
-        title: "Corridors of Learning",
-        artist: "Elena Rodriguez",
-        artistId: "artist5",
-        imageUrl: "https://images.unsplash.com/photo-1527576539890-dfa815648363",
-        category: "Photography",
-        description: "A candid black and white photograph capturing students walking through the architectural corridors of a university building. The interplay of light, shadow, and human movement creates a compelling visual narrative about academic life.",
-        likes: 64,
-        createdAt: "2025-02-19"
-      },
-      {
-        id: "6",
-        title: "Street Vendor at Dusk",
-        artist: "Devon Park",
-        artistId: "artist6",
-        imageUrl: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
-        category: "Photography",
-        description: "A high-contrast color photograph capturing the vibrant atmosphere of a street food vendor's stall at dusk. The warm glow of the vendor's lights against the darkening sky creates a dramatic scene filled with color, life, and cultural richness.",
-        likes: 73,
-        createdAt: "2025-03-05"
-      }
-    ];
-  };
-  
-  // Apply all filters
-  const handleApplyFilters = () => {
-    // Filters are already applied via useEffect
-  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -212,7 +134,7 @@ const Gallery = () => {
               <div className="lg:col-span-2">
                 <Button 
                   className="w-full bg-gallery-purple hover:bg-opacity-90"
-                  onClick={handleApplyFilters}
+                  onClick={() => handleApplyFilters()}
                 >
                   <Filter className="mr-2 h-4 w-4" /> Filter
                 </Button>
