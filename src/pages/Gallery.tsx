@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import ArtworkCard from '@/components/ArtworkCard';
@@ -134,7 +135,10 @@ const Gallery = () => {
               <div className="lg:col-span-2">
                 <Button 
                   className="w-full bg-gallery-purple hover:bg-opacity-90"
-                  onClick={() => handleApplyFilters()}
+                  onClick={() => {
+                    // Apply filters (they're already applied reactively in the useEffect)
+                    // No additional action needed here - filters are applied when state changes
+                  }}
                 >
                   <Filter className="mr-2 h-4 w-4" /> Filter
                 </Button>
