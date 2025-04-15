@@ -7,25 +7,7 @@ import { Navigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 
 const UploadArtwork: React.FC = () => {
-  const { currentUser, userRole, loading, authError } = useAuth();
-  
-  // If there's an auth error, show error state
-  if (authError) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center max-w-md neumorph p-8 rounded-lg">
-            <h1 className="text-2xl font-bold text-red-500 mb-4">Authentication Error</h1>
-            <p className="text-gallery-gray mb-6">
-              There was a problem with Firebase authentication. Please check your configuration.
-            </p>
-            <p className="text-sm text-gallery-gray">Error: {authError}</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  const { currentUser, userRole, loading } = useAuth();
   
   // If auth is still loading, show loading state
   if (loading) {

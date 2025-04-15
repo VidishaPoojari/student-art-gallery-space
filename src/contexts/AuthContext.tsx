@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User, 
@@ -18,7 +17,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
-  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   // Register a new user
   const register = async (email: string, password: string, name: string, role: string) => {
@@ -109,33 +106,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Listen for auth state changes
   useEffect(() => {
-    try {
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        setCurrentUser(user);
-        
-        if (user) {
-          try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-              setUserRole(userDoc.data().role);
-            }
-          } catch (error: any) {
-            console.error('Error fetching user role:', error);
-            setAuthError(`Error fetching user role: ${error.message}`);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
           }
-        } else {
-          setUserRole(null);
+        } catch (error) {
+          console.error('Error fetching user role:', error);
         }
-        
-        setLoading(false);
-      });
-
-      return unsubscribe;
-    } catch (error: any) {
-      console.error('Firebase auth initialization error:', error);
-      setAuthError(error.message);
+      } else {
+        setUserRole(null);
+      }
+      
       setLoading(false);
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
   const value = {
@@ -144,8 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     login,
     logout,
-    loading,
-    authError
+    loading
   };
 
   return (
