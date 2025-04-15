@@ -1,1 +1,1 @@
-# Welcome to your Virtual Art Gallery 
+# Welcome to your Virtual Art Gallery.
