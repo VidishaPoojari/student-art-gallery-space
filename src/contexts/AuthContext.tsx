@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User, 
@@ -49,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date().toISOString()
       });
       
+      // Set local storage items to persist auth state
+      localStorage.setItem('userRole', role);
+      
       toast({
         title: "Registration successful!",
         description: `You've registered as a ${role === 'student' ? 'Student Artist' : 'Visitor'}.`,
@@ -89,6 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await signOut(auth);
+      // Clear local storage on logout
+      localStorage.removeItem('userRole');
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
@@ -111,19 +118,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (user) {
         try {
+          // Get user data from Firestore
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
+            const role = userDoc.data().role;
+            setUserRole(role);
+            // Update local storage with user role
+            localStorage.setItem('userRole', role);
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
         }
       } else {
         setUserRole(null);
+        // Clear local storage when no user is found
+        localStorage.removeItem('userRole');
       }
       
       setLoading(false);
     });
+
+    // Try to get user role from local storage on initial load
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole) {
+      setUserRole(storedRole);
+    }
 
     return unsubscribe;
   }, []);

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Palette, Users, Image, Eye, Upload } from 'lucide-react';
@@ -52,6 +52,11 @@ const recentArtworks = [
 const Index = () => {
   const { currentUser, userRole } = useAuth();
   const isStudent = userRole === 'student';
+  
+  // Log auth state for debugging
+  useEffect(() => {
+    console.log('Auth state:', { currentUser, userRole, isStudent });
+  }, [currentUser, userRole, isStudent]);
   
   return (
     <div className="min-h-screen flex flex-col">

@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GalleryHorizontal, LogIn, Menu, Search, User, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,9 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   
-  // Check if user is logged in from localStorage
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  // Use the auth context instead of localStorage directly
+  const { currentUser } = useAuth();
+  const isLoggedIn = !!currentUser;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
