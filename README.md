@@ -1,43 +1,50 @@
+Virtual Art Gallery
 
-# Welcome to your Virtual Art Gallery 
+A simple web platform for students to upload and showcase their artwork online. Built using React and Firebase, the site allows image uploads, real-time comments, and a responsive gallery view.
 
-A platform for student artists to showcase their work and gain exposure in the art community.
+⸻
 
-## Features
-- Student artist registration and profile management
-- Artwork upload and management
-- Gallery viewing and artwork discovery
-- Community interaction through comments and likes
+Tech Stack
 
-## Development
+Frontend:
+	•	React.js
+	•	Vite
+	•	Tailwind CSS
+	•	React Router
 
-### Local Setup
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Run the development server: `npm run dev`
+Backend:
+	•	Firebase Authentication
+	•	Firestore (serverless backend)
 
-### Docker
-This project includes Docker integration for easy deployment:
+DevOps:
+	•	Docker
+	•	GitHub Actions
+	•	Vercel
 
-```bash
-# Build the Docker image
-docker build -t virtual-art-gallery .
+Testing:
+	•	Manual testing
+	•	System testing using test.sh
 
-# Run the container
-docker run -p 3000:3000 virtual-art-gallery
+⸻
 
-# Run tests
-./test.sh
-```
+Features
+	•	User authentication with role-based access (Student, Visitor, Owner)
+	•	Upload, edit, and delete artworks (with file size and format validation)
+	•	Browse artworks with category filters and search functionality
+	•	Real-time commenting on artworks using Firebase
+	•	Individual artist profile pages showing their uploaded works
+	•	Fully responsive design across mobile, tablet, and desktop
+	•	Docker-based CI/CD pipeline integrated with GitHub Actions and system test
 
-### CI/CD
-This project uses GitHub Actions for automated CI/CD to Docker Hub. When code is pushed to the main branch, it:
-1. Builds a Docker image
-2. Pushes the image to Docker Hub with the tag: `vidishapoojari/virtual-art-gallery`
+⸻
 
-## Technologies
-- React
-- TypeScript
-- Firebase (Authentication, Firestore, Storage)
-- Tailwind CSS
-- Shadcn UI
+CI/CD Pipeline
+
+Every push to the main branch triggers:
+	•	Docker image build
+	•	System test execution via test.sh
+	•	Image push to Docker Hub (vidishapoojari/virtual-art-gallery)
+	•	Frontend deployment to Vercel
+
+⸻
+
