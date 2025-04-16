@@ -21,6 +21,8 @@ jobs:
       with:
         username: vidishapoojari
         password: ${{ secrets.DOCKER_PASSWORD }}
+      continue-on-error: false
+      id: docker-login
         
     - name: Make test script executable
       run: chmod +x test.sh
@@ -30,3 +32,4 @@ jobs:
       
     - name: Push to Docker Hub
       run: docker push vidishapoojari/virtual-art-gallery
+      if: success()
