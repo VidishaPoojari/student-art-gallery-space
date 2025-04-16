@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Palette, Users, Image, Eye } from 'lucide-react';
+import { ArrowRight, Palette, Users, Image, Eye, Upload } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import FeaturedArtwork from '@/components/FeaturedArtwork';
 import ArtworkCard from '@/components/ArtworkCard';
@@ -187,8 +187,9 @@ const Index = () => {
               </Link>
             ) : isStudent ? (
               <Link to="/upload">
-                <Button className="bg-white text-gallery-purple hover:bg-opacity-90 px-8 py-6 text-lg rounded-md">
-                  Upload Your Art
+                <Button className="bg-white text-gallery-purple hover:bg-opacity-90 px-8 py-6 text-lg rounded-md flex items-center">
+                  <Upload className="mr-2 h-5 w-5" />
+                  Upload Your Artwork
                 </Button>
               </Link>
             ) : (
